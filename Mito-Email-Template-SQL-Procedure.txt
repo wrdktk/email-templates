@@ -1,0 +1,44 @@
+DROP PROCEDURE IF EXISTS createAttribute;
+
+DELIMITER //
+
+CREATE PROCEDURE createAttribute (
+    IN _orgName VARCHAR(100),
+    IN _keyName VARCHAR(100),
+    IN _valueName JSON )
+  BEGIN
+    DECLARE _orgId INT ;
+    DECLARE _attributeId INT ;
+    DECLARE _attributeAssignId INT ;
+    
+        set @_orgId = NULL;
+        select id into @_orgId from organization where name = _orgName;
+        if @_orgId IS NULL THEN
+            SELECT 'ERROR: Missing ORG.';
+        END IF;
+
+        set @_attributeId = NULL;
+        select id into @_attributeId from attribute where `key` = _keyName;
+        IF @_attributeId IS NULL THEN
+            insert into attribute (`key`, `value`) values (_keyName,_valueName);
+            select id into @_attributeId from attribute where `key` = _keyName;
+        END IF;
+    
+        set @_attributeAssignId = NULL;
+        select id into @_attributeAssignId FROM attributeAssign where attributeId = @_attributeId and organizationId = @_orgId;
+        IF @_attributeAssignId IS NULL THEN
+            insert into attributeAssign (attributeId, organizationId ) values (@_attributeId, @_orgId);            
+        END IF;
+
+  END //
+DELIMITER ;
+
+    
+call createAttribute('MitoAction', 'DigitalBinder_1', '"9f0cc327-b586-470c-98ea-f3ca2ae6b631"');
+call createAttribute('MitoAction', 'InAppCalendar_2', '"0cae046e-f46e-46e0-b451-708698db5bf6"');
+call createAttribute('MitoAction', 'SetupReminders_3', '"288d5fda-5f62-4cd4-8354-c0d9ca91719c"');
+call createAttribute('MitoAction', 'IncidentReport_4', '"3de46b27-950b-491b-b253-be658e31c0ff"');
+call createAttribute('MitoAction', 'ViewHistoryReports_5', '"03354cf9-645f-4cf4-bf13-dfe285a364d3"');
+call createAttribute('MitoAction', 'PrivateTexting_6', '"9d75998c-2794-4195-a6d2-f589fbe040c4"');
+
+DROP PROCEDURE IF EXISTS createAttribute;
